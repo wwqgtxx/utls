@@ -23,6 +23,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/tiendc/go-deepcopy"
 )
 
 // TLS reference tests run a connection against a reference implementation
@@ -492,9 +494,13 @@ func testUtlsHandshake(t *testing.T, clientConfig, serverConfig *Config, spec *C
 			Close() error
 			io.Reader
 		}
+		var spec1 ClientHelloSpec
 		if spec != nil {
 			ucli := UClient(c, clientConfig, HelloCustom)
-			if err = ucli.ApplyPreset(spec); err != nil {
+			if err = deepcopy.Copy(&spec1, spec); err != nil {
+				return
+			}
+			if err = ucli.ApplyPreset(&spec1); err != nil {
 				return
 			}
 			cli = ucli
